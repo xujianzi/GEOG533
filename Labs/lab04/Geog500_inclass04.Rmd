@@ -1,0 +1,95 @@
+---
+title: "Geog533 Inclass 4"
+author: "Dr. Qiusheng Wu"
+output: 
+  html_notebook:
+    toc: TRUE
+    toc_float: TRUE
+---
+
+**Questions:** Snowfall for a location is found to be normally distributed with mean 96″ and standard deviation of 32″.
+
+## Question 1a
+**(a) What is the probability that a given year will have 100″ of snow?**
+```{r}
+answer_a <- dnorm(100,mean = 96,sd = 32)
+print(answer_a)
+```
+
+The answer is **`r answer_a`**.
+
+Plot the density function:
+```{r}
+curve(dnorm(x,mean = 96,32),from = 0,to = 192)
+points(x = 100,y = answer_a,pch=16)
+```
+
+## Question 1b
+**(b) What is the probability that a given year will have more than 120″ of snow?**
+
+```{r}
+answer_b <- pnorm(120,mean = 96,sd = 32,lower.tail = FALSE)
+print(answer_b)
+```
+The answer is **`r answer_b`**.
+
+Plot the density function
+```{r}
+curve(dnorm(x,mean = 96,32),from = 0,to = 192)
+cord.x <- c(120,seq(120,192,by = 0.01),192)
+cord.y <- c(0,dnorm(seq(120,192,0.01),mean = 96,sd = 32),0)
+polygon(cord.x,cord.y,col="red")
+```
+
+## Question 1c
+**(c) What is the probability that a given year will have less than 80″ of snow?**
+```{r}
+answer_c <- pnorm(80,mean = 96,sd = 32)
+print(answer_c)
+```
+The answer is **`r answer_c`**
+
+Plot the density function:
+```{r}
+curve(dnorm(x,mean = 96,32),from = 0,to = 192)
+cord.x <- c(0,seq(0,80,by = 0.01),80)
+cord.y <- c(0,dnorm(seq(0,80,0.01),mean = 96,sd = 32),0)
+polygon(cord.x,cord.y,col="blue")
+```
+
+## Question 1d
+**(d) What is the probability that the snowfall will be between 90″ and 100″?**
+```{r}
+answer_d <- diff(pnorm(c(90,100),mean = 96,sd = 32))
+print(answer_d)
+```
+The answer is **`r answer_d`**
+
+Plot the density function:
+```{r}
+curve(dnorm(x,mean = 96,32),from = 0,to = 192)
+cord.x <- c(90,seq(90,100,by = 0.01),100)
+cord.y <- c(0,dnorm(seq(90,100,0.01),mean = 96,sd = 32),0)
+polygon(cord.x,cord.y,col="green")
+```
+
+
+## Question 1e
+**(e) What level of snowfall will be exceeded only 10% of the time?**
+
+
+```{r}
+answer_e <- qnorm(0.1,mean = 96,sd = 32,lower.tail = FALSE)
+print(answer_e)
+```
+
+The answer is **`r answer_e`**
+
+Plot the density function:
+```{r}
+curve(dnorm(x,mean = 96,32),from = 0,to = 192)
+cord.x <- c(137,seq(137,192,by = 0.01),192)
+cord.y <- c(0,dnorm(seq(137,192,0.01),mean = 96,sd = 32),0)
+polygon(cord.x,cord.y,col="black")
+```
+

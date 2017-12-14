@@ -1,0 +1,283 @@
+---
+title: "Geog533 Lab 8 - Bivariate Regression"
+author: "Dr. Qiusheng Wu"
+output: 
+  html_notebook:
+    toc: TRUE
+    toc_float: TRUE
+---
+
+Complete the following exercises in Chapter 8 (Introduction to Regression Analysis) of the textbook [R] pages 247-250. 
+
+## Question 1
+
+This is Exercise 1 in Chapter 8 of the Textbook [R].
+
+A regression of weekly shopping trip frequency on annual income (data entered in thousands of dollars) is performed on data collected from 24 respondents. The results are summarized below:
+
+* Intercept: 0.46
+* Slope: 0.19
+
+|          | Sum of squares  | Degrees of freedom |  Mean square   |       *F*       |
+|----------|-----------------|--------------------|----------------|-----------------|
+|Regression|                 |                    |                |                 |
+| Residual |       1.7       |                    |                |                 |
+| Total    |       2.3       |                    |                |                 |
+
+
+### Question 1(a)
+Fill in the blanks in the ANOVA table.
+
+```{r}
+q1.n <- 24
+q1.intercept <- 0.46
+
+q1.slope <- 0.19
+
+q1.TSS <- 2.3  # Total sum of squares
+q1.RSS <- 1.7  # Residual sum of squares
+q1.MSS <- q1.TSS - q1.RSS # Model sum of squares
+
+q1.df1 <- 1 
+q1.df2 <- q1.n-2
+
+q1.msq1 <- q1.MSS/q1.df1 # mean square of regression  0.6
+q1.msq2 <- q1.RSS/q1.df2  # mean square of residual   0.077
+
+q1.F.value <- q1.msq1/q1.msq2  # 7.76
+
+```
+
+
+|          | Sum of squares  | Degrees of freedom |  Mean square   |       *F*       |
+|----------|-----------------|--------------------|----------------|-----------------|
+|Regression|   `r q1.MSS`    |    `r q1.df1`      |    `r q1.msq1` |  `r q1.F.value` |
+| Residual |       1.7       |    `r q1.df2`      |     `r q1.msq2`|                 |
+| Total    |       2.3       |  `r q1.df1+q1.df2` |                |                 |
+
+
+### Question 1(b)
+What is the predicted number of weekly shopping trips for someone making $50,000/year?
+```{r}
+y <- q1.intercept + q1.slope * (50000/1000)  # y = 9.96
+y
+```
+
+
+### Question 1(c)
+In words, what is the meaning of the coefficient 0.19?
+
+The meaning is that **for every increase in annual income equal to $1000, the predicted weekly shopping trip frequency will increase by 0.19.**
+
+### Question 1(d)
+Is the regression coefficient significantly different from zero? How do you know?
+```{r}
+q1.F.critical <- qf(0.95,q1.df1,q1.df2)  # 4.30
+if(q1.F.value > q1.F.critical) {
+  print("We reject the null hypothesis")
+} else {
+  print("We fail to reject the null hypothesis")
+}
+
+# since F.value > F.critical, we reject the null hypothesis. In other words, the regression coefficient is significantly different from zero
+
+```
+
+
+
+### Question 1(e)
+What is the value of the correlation coefficient?
+```{r}
+q1.r.sq <- q1.MSS/q1.TSS  # R2 = 0.26
+q1.r <- sqrt(q1.r.sq)  # r = 0.51
+```
+
+The correlation coefficient is `r round(q1.r,2)`
+
+
+
+## Question 2
+
+This is Exercise 6 in Chapter 8 of the Textbook [R].
+
+The following data are collected in an effort to determine whether snowfall is dependent upon elevation: 
+
+| Snowfall (inches) | Elevation (feet) |
+|-------------------|------------------|
+|       36          |       400        |
+|       78          |       800        |
+|       11          |       200        |
+|       45          |       675        |
+
+Using R, show your work on exercises (a) through (g).
+
+### Question 2(a)
+Find the regression coefficients (the intercept and the slope coefficient).
+```{r}
+y <- c(36,78,11,45)
+x <- c(400,800,200,675)
+n <- length(y)
+
+m <- lm(y~x)
+summary(m)
+
+intercept <- coefficients(m)[1]
+slope <- coefficients(m)[2]
+```
+
+**intercept = `r intercept`**
+
+**slope = `r slope`**
+
+
+### Question 2(b)
+Estimate the standard error of the residuals about the regression line.
+```{r}
+# use the equation on page 236 of the textbook
+se <- sqrt(sum(residuals(m)^2)/(n-2))  # 11.252
+```
+
+The standard error of the residuals is: **`r se`**
+
+### Question 2(c)
+Test the hypothesis that the regression coefficient associated with the independent variables is equal to zero. Also place a 95% confidence interval on the regression coefficient.
+```{r}
+summary(m)
+anova(m)
+# p-value: 0.05663
+# p-value > 0.05, so we fail to reject the null hypothesis that the regression coefficient associated with the independent variables is equal to zero
+confint(m)
+#                     2.5 %     97.5 %
+# (Intercept)   -66.487337152 51.2129252
+# x             -0.006754067  0.2000541
+```
+
+
+### Question 2(d)
+Find the value of $r^2$.
+```{r}
+summary(m)
+# R2 = 0.8899
+```
+
+
+### Question 2(e)
+Make a table of the observed values, predicted values, and the residuals.
+```{r}
+df <- data.frame(x,y)
+df$predict <- fitted(m)
+df$residual <- residuals(m)
+library(knitr)
+kable(df)
+```
+
+
+### Question 2(f)
+Prepare an analysis of variance table portraying the regression results.
+```{r}
+am <- anova(m)
+MSS <- am["Sum Sq"][[1]][1]
+RSS <- am["Sum Sq"][[1]][2]
+TSS <- MSS+RSS
+df1 <- am["Df"][[1]][1]
+df2 <- am["Df"][[1]][2]
+df3 <- df1+df2
+msq1 <- am["Mean Sq"][[1]][1]
+msq2 <- am["Mean Sq"][[1]][2]
+F.value <- am["F value"][[1]][1]
+```
+
+
+|          | Sum of squares  | Degrees of freedom |  Mean square   |       *F*       |
+|----------|-----------------|--------------------|----------------|-----------------|
+|Regression|    `r MSS`      |       `r df1`      | `r msq1`       |    `r F.value`  |
+| Residual |    `r RSS`      |       `r df2`      |`r msq2`        |                 |
+| Total    |    `r TSS`      |       `r df3`      |                |                 |
+
+### Question 2(g)
+Graph the data and the regression line.
+```{r}
+plot(x,y)
+abline(m,col="red",lwd=2)
+```
+
+
+
+
+## Question 3
+
+This is Exercise 10 in Chapter 8 of the Textbook [R].
+
+Use R and the [Milwaukee dataset](http://spatial.binghamton.edu/geog533/data/Milwaukee_Sales.csv) to:
+
+### Problem
+perform a regression using sales price as the dependent variable and lot size as the independent variable.
+
+### Solution
+```{r}
+url = "http://spatial.binghamton.edu/geog533/data/Milwaukee_Sales.csv"
+df <- read.csv(url,header = TRUE)
+m <- lm(SalePrice ~ LotSize,data = df)
+summary(m)
+plot(df$LotSize,df$SalePrice)
+abline(m,col="red",lwd=2)
+
+```
+
+
+
+## Question 4
+
+This is Exercise 11 in Chapter 8 of the Textbook [R].
+
+Use R and the Hypothetical [UK Housing Prices dataset](http://spatial.binghamton.edu/geog533/data/UK_Housing.csv) to:
+
+### Question 4(a) 
+perform a regression using house price as the dependent variable, and number of bedrooms as the independent variable;
+
+```{r}
+url = "http://spatial.binghamton.edu/geog533/data/UK_Housing.csv"
+df <- read.csv(url,header = TRUE)
+m <- lm(df$price~df$bedrooms)
+summary(m)
+```
+
+
+### Question 4(b) 
+repeat part (a), using the number of bathrooms as the independent variable, and comment on the results.
+```{r}
+m <- lm(df$price~df$bathrooms)
+summary(m)
+```
+
+
+## Question 5
+Download the [hometown.csv](http://spatial.binghamton.edu/geog533/data/hometown.csv), append your name and hometown coordinates to the csv, then use [leaflet](https://rstudio.github.io/leaflet/) to create a web map (10 pt.)
+
+```{r, message=FALSE, warning=FALSE}
+if(!require(leaflet)) install.packages("leaflet")
+library(leaflet)
+df <- read.csv("http://spatial.binghamton.edu/leaflet/hometown.csv")
+#df <- read.csv("hometown.csv")
+df$latitude = as.character(lapply(strsplit(as.character(df$location), split=","), "[", 1))
+df$longitude = as.character(lapply(strsplit(as.character(df$location), split=","), "[", 2))
+df$fullname <- paste(df$firstname,df$lastname)  
+df$popup <- paste("<center><h4>",df$fullname,"</h4></center>","<img src=",df$image," width='200px'/>",sep = "")
+#write.csv(df,"hometown.csv",row.names = FALSE)
+leafIcons <- icons(
+  iconUrl = ifelse(df$type == "grads",
+                   "http://spatial.binghamton.edu/leaflet/images/Blue.png",
+                   "http://spatial.binghamton.edu/leaflet/images/Red.png"))
+leaflet(df,width = "100%",height = 800) %>% 
+  addTiles(group = "OSM (default)") %>%
+  addProviderTiles(provider = "Esri.WorldStreetMap",group = "World StreetMap") %>%
+  addProviderTiles(provider = "Esri.WorldImagery",group = "World Imagery") %>%
+  addProviderTiles(provider = "NASAGIBS.ViirsEarthAtNight2012",group = "Nighttime Imagery") %>%
+  addTiles() %>% fitBounds(147,90,-101,-90) %>% 
+  addMarkers(lng = as.numeric(df$longitude), lat = as.numeric(df$latitude), icon =leafIcons,popup = df$popup,clusterOptions = markerClusterOptions())  %>% 
+  addLayersControl(
+    baseGroups = c("OSM (default)","World StreetMap", "World Imagery", "Nighttime Imagery"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+```
+

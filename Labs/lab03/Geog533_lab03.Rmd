@@ -1,0 +1,110 @@
+---
+title: "GEOG533 Lab 3"
+author: "Dr. Qiusheng Wu"
+output: 
+  html_notebook:
+    toc: TRUE
+    toc_float: TRUE
+---
+
+## Question 1
+
+The **Cars93** dataset in the **MASS** package contains data from 93 cars on sale in the USA in 1993. Randomly select 40 cars as the training dataset and the remaining 53 cars as the test dataset. Save both datasets as csv files. Find out the number of **USA** and **non-USA** cars in the training dataset. (10 pt.)
+
+### Solution 1
+
+```{r, message=FALSE, warning=FALSE}
+library(MASS)
+df <- Cars93
+
+set.seed(100)
+nrows <- nrow(df)
+id <- 1:nrows
+train.index <- sort(sample(1:nrows,40))
+train.index
+test.index <- id[-train.index]
+test.index
+
+train.df <- df[train.index,]
+# library(knitr)
+# kable(train.df)
+test.df <- df[test.index,]
+table(train.df$Origin)
+
+if(!(require(DT))) install.packages("DT")
+library(DT)
+datatable(train.df,caption = "Training dataset",options = list(pageLength = 5, scrollX=TRUE))
+datatable(test.df,caption = "Test dataset",options = list(pageLength = 5, scrollX=TRUE))
+
+```
+
+### Solution 2
+```{r, message=FALSE, warning=FALSE}
+if(!require(dplyr)) install.packages("dplyr")
+library(dplyr)
+library(MASS)
+df <- Cars93
+
+df$id <- 1:nrow(df)
+train.df <- sample_n(df,size = 40)
+test.df <- anti_join(df,train.df,by="id")
+
+# Display the data
+if(!(require(DT))) install.packages("DT")
+library(DT)
+datatable(train.df,caption = "Training dataset",options = list(pageLength = 5, scrollX=TRUE))
+datatable(test.df,caption = "Test dataset",options = list(pageLength = 5, scrollX=TRUE))
+```
+
+
+
+## Question 2
+Assume that the probabilities of boy and girl births are 0.515 and 0.485, respectively. Use the **sample()** function to simulate 10 births and print out the result. How many boys and girls do you get out of 10 births? Then simulate 10,000 births. How many boys and girls do you get out of 10,000 births? (10 pt.)
+
+```{r}
+births <- sample(c("boy","girl"),size = 10,replace = TRUE,prob = c(0.515,0.485))
+births
+table(births)
+
+births <- sample(c("boy","girl"),size = 10000,replace = TRUE,prob = c(0.515,0.485))
+table(births)
+```
+
+## Question 3
+Assume that the probabilities of boy and girl births are 0.515 and 0.485, respectively. What’s the probability of having exactly 3 boys out of 10 births? What’s the probability of having 8 or more boys out of 10 births?  Plot both the density function and cumulative probability function of the number of boy births out of 10. (15 pt.)
+
+```{r}
+prob1 <- dbinom(3,size = 10,prob = 0.515)
+prob1
+
+prob2 <- 1 - pbinom(7,size = 10,prob = 0.515)
+prob2
+pbinom(7,size = 10,prob = 0.515,lower.tail = FALSE)
+
+n <- 10
+x <- 0:n
+y <- dbinom(x,size = n,prob = 0.515)
+plot(x,y)
+plot(x,y,type="b",pch=16,col="black", xlab="number of boys in 10 births",ylab="probability")
+
+y <- pbinom(x,size = n,prob = 0.515)
+plot(x,y)
+plot(x,y,type="b",pch=16,col="black", xlab="number of boys in 10 births",ylab="probability")
+```
+
+## Question 4
+If cars arrive randomly at a traffic light at the rate of five every ten seconds. What the probability that exactly four cars arrive in the next ten seconds? What’s the probability that more than five cars arrive in the next ten seconds?  Plot the density function of 0-20 cars arriving in the next ten seconds. (15 pt.)
+
+```{r}
+dpois(4,lambda = 5)
+1 - ppois(5,lambda = 5)
+ppois(5,lambda = 5,lower.tail = FALSE)
+
+n <- 20
+x <- 0:n
+y <- dpois(x,lambda = 5)
+
+plot(x,y)
+plot(x,y,type = "b",pch = 16,col="black")
+```
+
